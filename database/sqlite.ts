@@ -36,12 +36,12 @@ export const initDb = async () => {
 
 export const addToWishlist = async (id: string, title: string, authors: string, thumbnail: string) => {
   const db = await getDb();
-  await db.runAsync('INSERT OR REPLACE INTO books_wishlist (id, title, authors, thumbnail) VALUES (?, ?, ?, ?)', [id, title, authors, thumbnail]);
+  await db.runAsync('INSERT OR REPLACE INTO books_wishlist (id, title, authors, thumbnail) VALUES (?, ?, ?, ?)', id, title, authors, thumbnail);
 };
 
 export const removeFromWishlist = async (id: string) => {
   const db = await getDb();
-  await db.runAsync('DELETE FROM books_wishlist WHERE id = ?', [id]);
+  await db.runAsync('DELETE FROM books_wishlist WHERE id = ?', id);
 };
 
 export const getWishlist = async () => {
@@ -53,7 +53,7 @@ export const addReview = async (bookId: string, title: string, rating: number, r
   const db = await getDb();
   await db.runAsync(
     'INSERT INTO books_reviews (bookId, title, rating, reviewText, imageUri, locationLat, locationLng, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
-    [bookId, title, rating, reviewText, imageUri, locationLat, locationLng, new Date().toISOString()]
+    bookId, title, rating, reviewText, imageUri, locationLat, locationLng, new Date().toISOString()
   );
 };
 

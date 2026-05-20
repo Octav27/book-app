@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Image, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-import { Input } from '../../components/Input';
-import { Button } from '../../components/Button';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
 import { useStore } from '../../store/useStore';
 
 interface BookItem {
@@ -31,23 +31,28 @@ export default function SearchScreen() {
     }
     setLoading(true);
     try {
-      const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`);
+      const apiKey = process.env.EXPO_PUBLIC_BOOKS_API_KEY ? `&key=${process.env.EXPO_PUBLIC_BOOKS_API_KEY}` : '';
+      const response = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}${apiKey}`);
       setResults(response.data.items || []);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      if (e.response?.status === 429) {
+        alert("Ai depășit limita de căutări permise de Google Books API. Te rugăm să încerci din nou mai târziu!");
+      } else {
+        alert("Eroare la căutarea cărților.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const renderItem = ({ item }: { item: BookItem }) => (
-    <TouchableOpacity 
-      style={styles.card} 
+    <TouchableOpacity
+      style={styles.card}
       onPress={() => router.push(`/books/${item.id}`)}
     >
-      <Image 
-        source={{ uri: item.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150' }} 
-        style={styles.thumbnail} 
+      <Image
+        source={{ uri: item.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150' }}
+        style={styles.thumbnail}
       />
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={2}>{item.volumeInfo.title}</Text>
@@ -62,9 +67,9 @@ export default function SearchScreen() {
     <View style={styles.container}>
       <View style={styles.searchBar}>
         <View style={{ flex: 1 }}>
-          <Input 
+          <Input
             label=""
-            placeholder="Search books..." 
+            placeholder="Search books..."
             value={query}
             onChangeText={setQuery}
             onSubmitEditing={handleSearch}
@@ -74,7 +79,7 @@ export default function SearchScreen() {
           <Button title="Search" onPress={handleSearch} isLoading={loading} />
         </View>
       </View>
-      
+
       {loading ? (
         <ActivityIndicator size="large" style={{ marginTop: 20 }} />
       ) : (
@@ -94,10 +99,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F2F7' },
   searchBar: { flexDirection: 'row', paddingHorizontal: 16, alignItems: 'center', backgroundColor: '#FFF', paddingBottom: 16 },
   list: { padding: 16 },
-  card: { 
-    flexDirection: 'row', 
-    backgroundColor: '#FFF', 
-    borderRadius: 8, 
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    borderRadius: 8,
     padding: 12,
     shadowColor: '#000',
     shadowOpacity: 0.1,

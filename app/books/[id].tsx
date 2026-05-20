@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator, ScrollView, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../../components/Button';
 import { addToWishlist } from '../../database/sqlite';
 import { useStore } from '../../store/useStore';
@@ -16,7 +16,8 @@ export default function BookDetailScreen() {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const response = await axios.get(`https://www.googleapis.com/books/v1/volumes/${id}`);
+        const apiKey = process.env.EXPO_PUBLIC_BOOKS_API_KEY ? `?key=${process.env.EXPO_PUBLIC_BOOKS_API_KEY}` : '';
+        const response = await axios.get(`https://www.googleapis.com/books/v1/volumes/${id}${apiKey}`);
         setBook(response.data);
       } catch (e) {
         console.error(e);
@@ -57,21 +58,21 @@ export default function BookDetailScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Image 
-        source={{ uri: volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150' }} 
-        style={styles.cover} 
+      <Image
+        source={{ uri: volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150' }}
+        style={styles.cover}
       />
       <View style={styles.content}>
         <Text style={styles.title}>{volumeInfo.title}</Text>
         <Text style={styles.authors}>{volumeInfo.authors?.join(', ')}</Text>
         <Text style={styles.description}>{volumeInfo.description}</Text>
-        
+
         <View style={styles.actions}>
           <Button title="Add to Wishlist" onPress={handleAddToWishlist} variant="secondary" />
-          <Button 
-            title="Add Review" 
-            onPress={() => router.push({ pathname: '/books/add-review', params: { bookId: id, title: volumeInfo.title } })} 
-            variant="primary" 
+          <Button
+            title="Add Review"
+            onPress={() => router.push({ pathname: '/books/add-review', params: { bookId: id, title: volumeInfo.title } })}
+            variant="primary"
           />
         </View>
       </View>
